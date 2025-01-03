@@ -597,8 +597,7 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"aenu9":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _webImmediateJs = require("core-js/modules/web.immediate.js"); // we put the events into an array and ran the forEach method on it to add the event listeners to the window object.
- // window.addEventListener("hashchange", controlRecipes);
+var _webImmediateJs = require("core-js/modules/web.immediate.js"); // window.addEventListener("hashchange", controlRecipes);
  // window.addEventListener("load", controlRecipes);
 var _modelJs = require("./model.js");
 var _recipeViewJs = require("./views/recipeView.js");
@@ -622,10 +621,10 @@ const controlRecipes = async function() {
     }
 };
 controlRecipes();
-[
-    "hashchange",
-    "load"
-].forEach((ev)=>window.addEventListener(ev, controlRecipes));
+const init = function() {
+    (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
+};
+init();
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ","./model.js":"Y4A21","./views/recipeView.js":"l60JC"}],"gkKU3":[function(require,module,exports,__globalThis) {
 exports.interopDefault = function(a) {
@@ -2538,7 +2537,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "getJSON", ()=>getJSON);
 var _regeneratorRuntime = require("regenerator-runtime");
-var _config = require("./config");
+var _configJs = require("./config.js");
 const timeout = function(s) {
     return new Promise(function(_, reject) {
         setTimeout(function() {
@@ -2550,7 +2549,7 @@ const getJSON = async function(url) {
     try {
         const res = await Promise.race([
             fetch(url),
-            timeout(10)
+            timeout((0, _configJs.TIMEOUT_SEC))
         ]);
         const data = await res.json();
         if (!res.ok) throw new Error(`${data.message}( ${res.status})`);
@@ -2560,7 +2559,7 @@ const getJSON = async function(url) {
     }
 }; //the helpers.js file is a file that contains helper functions that are used in multiple files. This is a good practice to keep the code DRY.
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime":"dXNgZ","./config":"k5Hzs"}],"l60JC":[function(require,module,exports,__globalThis) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime":"dXNgZ","./config.js":"k5Hzs"}],"l60JC":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _iconsSvg = require("url:../../img/icons.svg"); // url:... for parcel v2.
@@ -2589,6 +2588,12 @@ class RecipeView {
         this._parentElement.innerHTML = "";
         this._parentElement.insertAdjacentHTML("afterbegin", markup);
     };
+    addHandlerRender(handler) {
+        [
+            "hashchange",
+            "load"
+        ].forEach((ev)=>window.addEventListener(ev, handler)); // we put the events into an array and ran the forEach method on it to add the event listeners to the window object.
+    }
     _generateMarkup() {
         return `
       <figure class="recipe__fig">

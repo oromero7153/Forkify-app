@@ -29,9 +29,11 @@ const controlRecipes = async function () {
 };
 controlRecipes();
 
-["hashchange", "load"].forEach((ev) =>
-  window.addEventListener(ev, controlRecipes)
-); // we put the events into an array and ran the forEach method on it to add the event listeners to the window object.
+const init = function () {
+  recipeView.addHandlerRender(controlRecipes);
+};
+
+init();
 
 // window.addEventListener("hashchange", controlRecipes);
 // window.addEventListener("load", controlRecipes);
