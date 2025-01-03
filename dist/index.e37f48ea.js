@@ -2531,7 +2531,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "API_URL", ()=>API_URL);
 parcelHelpers.export(exports, "TIMEOUT_SEC", ()=>TIMEOUT_SEC);
 const API_URL = "https://forkify-api.jonas.io/api/v2/recipes/";
-const TIMEOUT_SEC = 10;
+const TIMEOUT_SEC = 10; // the config file is used for all the constants that are used in multiple files. This is a good practice to keep the code DRY.
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hGI1E":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -2558,7 +2558,7 @@ const getJSON = async function(url) {
     } catch (err) {
         throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
     }
-};
+}; //the helpers.js file is a file that contains helper functions that are used in multiple files. This is a good practice to keep the code DRY.
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime":"dXNgZ","./config":"k5Hzs"}],"l60JC":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");

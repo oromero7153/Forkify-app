@@ -20,3 +20,5 @@ export const getJSON = async function (url) {
     throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
   }
 };
+
+//the helpers.js file is a file that contains helper functions that are used in multiple files. This is a good practice to keep the code DRY.
