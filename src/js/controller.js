@@ -2,10 +2,11 @@ import * as model from "./model.js";
 import recipeView from "./views/recipeView.js";
 import searchView from "./views/searchView.js";
 import resultsView from "./views/resultsView.js";
+import paginationView from "./views/paginationView.js";
+import bookmarksView from "./views/bookmarksView.js";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
-import paginationView from "./views/paginationView.js";
 
 // if (module.hot) {
 //   module.hot.accept();
@@ -24,14 +25,17 @@ const controlRecipes = async function () {
 
     //0 update results view to mark selected search result
     resultsView.update(model.getSearchResultsPage());
+    //1. updatring bookmarks view
+    bookmarksView.update(model.state.bookmarks);
 
-    //1. Loading recipe
+    //2. Loading recipe
     await model.loadRecipe(id); // this is an await because it is an async function in the model.js file.
 
-    //2. Rendering recipe
+    //3. Rendering recipe
     recipeView.render(model.state.recipe);
   } catch (err) {
     recipeView.renderError();
+    console.error(err);
   }
 };
 
@@ -73,12 +77,29 @@ const controlServings = function (newServings) {
   // recipeView.render(model.state.recipe);
   recipeView.update(model.state.recipe);
 };
+const controlAddBookmark = function () {
+  //1. Add or remove bookmark
+  if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
+  else model.deleteBookmark(model.state.recipe.id);
+
+  //2. update recipe view
+  recipeView.update(model.state.recipe);
+
+  //3. render bookmarks view
+  bookmarksView.render(model.state.bookmarks);
+};
+
+const controlBookmarks = function () {
+  bookmarksView.render(model.state.bookmarks);
+};
 
 const init = function () {
+  bookmarksView.addHandlerRender(controlBookmarks);
   recipeView.addHandlerRender(controlRecipes);
   recipeView.addHandlerUpdateServings(controlServings);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
+  recipeView.addHandlerAddBookmark(controlAddBookmark);
 };
 
 init();
