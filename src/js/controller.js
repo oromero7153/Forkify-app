@@ -94,6 +94,10 @@ const controlBookmarks = function () {
   bookmarksView.render(model.state.bookmarks);
 };
 
+const controlAddRecipe = function (newRecipe) {
+  console.log(newRecipe);
+};
+
 const init = function () {
   bookmarksView.addHandlerRender(controlBookmarks);
   recipeView.addHandlerRender(controlRecipes);
@@ -101,6 +105,7 @@ const init = function () {
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
   recipeView.addHandlerAddBookmark(controlAddBookmark);
+  addRecipeView.addHandlerUpload(controlAddRecipe);
 };
 
 init();

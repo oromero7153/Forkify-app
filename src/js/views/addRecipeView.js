@@ -29,11 +29,12 @@ class AddRecipeView extends View {
     this._overlay.addEventListener("click", this.toggleWindow.bind(this));
   }
 
-  addHandlerUpload() {
-    this._parentElement.addEventListener("suubmit", function (e) {
+  addHandlerUpload(handler) {
+    this._parentElement.addEventListener("submit", function (e) {
       e.preventDefault();
-      const data = [...new FormData(this)];
-      console.log(data);
+      const dataArray = [...new FormData(this)];
+      const data = Object.fromEntries(dataArray);
+      handler(data);
     });
   }
 

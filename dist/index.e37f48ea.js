@@ -678,6 +678,9 @@ const controlAddBookmark = function() {
 const controlBookmarks = function() {
     (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookmarks);
 };
+const controlAddRecipe = function(newRecipe) {
+    console.log(newRecipe);
+};
 const init = function() {
     (0, _bookmarksViewJsDefault.default).addHandlerRender(controlBookmarks);
     (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
@@ -685,6 +688,7 @@ const init = function() {
     (0, _searchViewJsDefault.default).addHandlerSearch(controlSearchResults);
     (0, _paginationViewJsDefault.default).addHandlerClick(controlPagination);
     (0, _recipeViewJsDefault.default).addHandlerAddBookmark(controlAddBookmark);
+    (0, _addRecipeViewJsDefault.default).addHandlerUpload(controlAddRecipe);
 };
 init();
 
@@ -3224,7 +3228,35 @@ class ResultsView extends (0, _viewJsDefault.default) {
 }
 exports.default = new ResultsView();
 
-},{"./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp"}],"6z7bi":[function(require,module,exports,__globalThis) {
+},{"./View.js":"5cUXS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp","./previewView.js":"1FDQ6"}],"1FDQ6":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _viewJs = require("./View.js"); // importing the parent class.
+var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
+var _iconsSvg = require("url:../../img/icons.svg"); // url:... for parcel v2.
+var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
+class PreviewView extends (0, _viewJsDefault.default) {
+    _parentElement = "";
+    _generateMarkup() {
+        const id = window.location.hash.slice(1);
+        return `
+        <li class="preview">
+            <a class="preview__link ${this._data.id === id ? "preview__link--active" : ""}" href="#${this._data.id}">
+              <figure class="preview__fig">
+                <img src="${this._data.image}" alt="${this._data.title}" />
+              </figure>
+              <div class="preview__data">
+                <h4 class="preview__title">${this._data.title}</h4>
+                <p class="preview__publisher">${this._data.publisher}</p>
+              </div>
+            </a>
+          </li>
+    `;
+    }
+}
+exports.default = new PreviewView();
+
+},{"./View.js":"5cUXS","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6z7bi":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _viewJs = require("./View.js"); // importing the parent class.
@@ -3306,35 +3338,7 @@ class BookmarksView extends (0, _viewJsDefault.default) {
 }
 exports.default = new BookmarksView();
 
-},{"./View.js":"5cUXS","./previewView.js":"1FDQ6","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1FDQ6":[function(require,module,exports,__globalThis) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _viewJs = require("./View.js"); // importing the parent class.
-var _viewJsDefault = parcelHelpers.interopDefault(_viewJs);
-var _iconsSvg = require("url:../../img/icons.svg"); // url:... for parcel v2.
-var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
-class PreviewView extends (0, _viewJsDefault.default) {
-    _parentElement = "";
-    _generateMarkup() {
-        const id = window.location.hash.slice(1);
-        return `
-        <li class="preview">
-            <a class="preview__link ${this._data.id === id ? "preview__link--active" : ""}" href="#${this._data.id}">
-              <figure class="preview__fig">
-                <img src="${this._data.image}" alt="${this._data.title}" />
-              </figure>
-              <div class="preview__data">
-                <h4 class="preview__title">${this._data.title}</h4>
-                <p class="preview__publisher">${this._data.publisher}</p>
-              </div>
-            </a>
-          </li>
-    `;
-    }
-}
-exports.default = new PreviewView();
-
-},{"./View.js":"5cUXS","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"i6DNj":[function(require,module,exports,__globalThis) {
+},{"./View.js":"5cUXS","./previewView.js":"1FDQ6","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"i6DNj":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _viewJs = require("./View.js"); // importing the parent class.
@@ -3363,13 +3367,14 @@ class AddRecipeView extends (0, _viewJsDefault.default) {
         this._btnClose.addEventListener("click", this.toggleWindow.bind(this));
         this._overlay.addEventListener("click", this.toggleWindow.bind(this));
     }
-    addHandlerUpload() {
-        this._parentElement.addEventListener("suubmit", function(e) {
+    addHandlerUpload(handler) {
+        this._parentElement.addEventListener("submit", function(e) {
             e.preventDefault();
-            const data = [
+            const dataArray = [
                 ...new FormData(this)
             ];
-            console.log(data);
+            const data = Object.fromEntries(dataArray);
+            handler(data);
         });
     }
     _generateMarkup() {}
