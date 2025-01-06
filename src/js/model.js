@@ -1,6 +1,7 @@
 import { async } from "regenerator-runtime";
 import { API_URL, RES_PER_PAGE, KEY } from "./config";
-import { getJSON, sendJSON } from "./helpers";
+// import { getJSON, sendJSON } from "./helpers";
+import { AJAX } from "./helpers";
 import { title } from "process";
 export const state = {
   recipe: {},
@@ -30,7 +31,7 @@ const createRecipeObject = function (data) {
 
 export const loadRecipe = async function (id) {
   try {
-    const data = await getJSON(`${API_URL}${id}`);
+    const data = await AJAX(`${API_URL}${id}?key=${KEY}`);
     state.recipe = createRecipeObject(data);
 
     if (state.bookmarks.some((bookmark) => bookmark.id === id))
@@ -46,7 +47,7 @@ export const loadRecipe = async function (id) {
 export const loadSearchresults = async function (query) {
   try {
     state.search.query = query;
-    const data = await getJSON(`${API_URL}?search=${query}`);
+    const data = await AJAX(`${API_URL}?search=${query}&key=${KEY}`);
 
     state.search.results = data.data.recipes.map((rec) => {
       return {
@@ -54,6 +55,7 @@ export const loadSearchresults = async function (query) {
         title: rec.title,
         publisher: rec.publisher,
         image: rec.image_url,
+        ...(rec.key && { key: rec.key }),
       };
     });
     state.search.page = 1;
@@ -120,9 +122,10 @@ const clearBookmarks = function () {
 export const uploadRecipe = async function (newRecipe) {
   try {
     const ingredients = Object.entries(newRecipe)
-      .filter((entry) => entry[0].startsWith("ingredient") && entry[1] !== "")
+      .filter((entry) => entry[0].startsWith("ingredient") && entry[1] !== "") // the entry[0] is the key and entry[1] is the value. This line filters out the ingredients from the newRecipe object.
       .map((ing) => {
-        const ingArr = ing[1].replaceAll(" ", "").split(",");
+        // const ingArr = ing[1].replaceAll(" ", "").split(",");
+        const ingArr = ing[1].split(",").map((el) => el.trim());
         if (ingArr.length !== 3)
           throw new Error(
             "Wrong, ingredient format. Please use the correct format."
@@ -141,7 +144,7 @@ export const uploadRecipe = async function (newRecipe) {
       servings: +newRecipe.servings,
       ingredients,
     };
-    const data = await sendJSON(`${API_URL}?key=${KEY}`, recipe);
+    const data = await AJAX(`${API_URL}?key=${KEY}`, recipe);
     state.recipe = createRecipeObject(data);
     addBookmark(state.recipe);
   } catch (err) {

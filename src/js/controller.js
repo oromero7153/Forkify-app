@@ -108,6 +108,13 @@ const controlAddRecipe = async function (newRecipe) {
 
     //success message
     addRecipeView.renderMessage();
+
+    //render bookmark view
+    bookmarksView.render(model.state.bookmarks);
+
+    //change ID in URL
+    window.history.pushState(null, "", `#${model.state.recipe.id}`); // the pushState method is used to add a new state to the history of the browser. The first argument is the state object, the second argument is the title of the page, and the third argument is the URL of the page.
+
     //close form
     setTimeout(function () {
       addRecipeView.toggleWindow();

@@ -9,6 +9,28 @@ const timeout = function (s) {
   });
 };
 
+export const AJAX = async function (url, uploadData = undefined) {
+  try {
+    const fetchPro = uploadData
+      ? fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(uploadData),
+        })
+      : fetch(url);
+
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(`${data.message}( ${res.status})`);
+    return data;
+  } catch (err) {
+    throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
+  }
+};
+/*
 export const getJSON = async function (url) {
   try {
     const res = await Promise.race([fetch(url), timeout(TIMEOUT_SEC)]);
@@ -20,6 +42,8 @@ export const getJSON = async function (url) {
     throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
   }
 };
+
+
 
 export const sendJSON = async function (url, uploadData) {
   try {
@@ -41,5 +65,6 @@ export const sendJSON = async function (url, uploadData) {
     throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
   }
 };
+*/
 
 //the helpers.js file is a file that contains helper functions that are used in multiple files. This is a good practice to keep the code DRY.

@@ -35,7 +35,7 @@ class AddRecipeView extends View {
       e.preventDefault();
       const dataArray = [...new FormData(this)];
       const data = Object.fromEntries(dataArray);
-      handler(data);
+      handler(data); // what this handler does is to upload the recipe to the server and then render the recipe.
     });
   }
 

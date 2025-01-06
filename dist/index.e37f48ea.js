@@ -690,6 +690,10 @@ const controlAddRecipe = async function(newRecipe) {
         (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
         //success message
         (0, _addRecipeViewJsDefault.default).renderMessage();
+        //render bookmark view
+        (0, _bookmarksViewJsDefault.default).render(_modelJs.state.bookmarks);
+        //change ID in URL
+        window.history.pushState(null, "", `#${_modelJs.state.recipe.id}`); // the pushState method is used to add a new state to the history of the browser. The first argument is the state object, the second argument is the title of the page, and the third argument is the URL of the page.
         //close form
         setTimeout(function() {
             (0, _addRecipeViewJsDefault.default).toggleWindow();
@@ -2589,6 +2593,7 @@ parcelHelpers.export(exports, "deleteBookmark", ()=>deleteBookmark);
 parcelHelpers.export(exports, "uploadRecipe", ()=>uploadRecipe);
 var _regeneratorRuntime = require("regenerator-runtime");
 var _config = require("./config");
+// import { getJSON, sendJSON } from "./helpers";
 var _helpers = require("./helpers");
 var _process = require("process");
 const state = {
@@ -2619,7 +2624,7 @@ const createRecipeObject = function(data) {
 };
 const loadRecipe = async function(id) {
     try {
-        const data = await (0, _helpers.getJSON)(`${(0, _config.API_URL)}${id}`);
+        const data = await (0, _helpers.AJAX)(`${(0, _config.API_URL)}${id}?key=${(0, _config.KEY)}`);
         state.recipe = createRecipeObject(data);
         if (state.bookmarks.some((bookmark)=>bookmark.id === id)) state.recipe.bookmarked = true;
         else state.recipe.bookmarked = false;
@@ -2632,13 +2637,16 @@ const loadRecipe = async function(id) {
 const loadSearchresults = async function(query) {
     try {
         state.search.query = query;
-        const data = await (0, _helpers.getJSON)(`${(0, _config.API_URL)}?search=${query}`);
+        const data = await (0, _helpers.AJAX)(`${(0, _config.API_URL)}?search=${query}&key=${(0, _config.KEY)}`);
         state.search.results = data.data.recipes.map((rec)=>{
             return {
                 id: rec.id,
                 title: rec.title,
                 publisher: rec.publisher,
-                image: rec.image_url
+                image: rec.image_url,
+                ...rec.key && {
+                    key: rec.key
+                }
             };
         });
         state.search.page = 1;
@@ -2688,8 +2696,10 @@ const clearBookmarks = function() {
 };
 const uploadRecipe = async function(newRecipe) {
     try {
-        const ingredients = Object.entries(newRecipe).filter((entry)=>entry[0].startsWith("ingredient") && entry[1] !== "").map((ing)=>{
-            const ingArr = ing[1].replaceAll(" ", "").split(",");
+        const ingredients = Object.entries(newRecipe).filter((entry)=>entry[0].startsWith("ingredient") && entry[1] !== "") // the entry[0] is the key and entry[1] is the value. This line filters out the ingredients from the newRecipe object.
+        .map((ing)=>{
+            // const ingArr = ing[1].replaceAll(" ", "").split(",");
+            const ingArr = ing[1].split(",").map((el)=>el.trim());
             if (ingArr.length !== 3) throw new Error("Wrong, ingredient format. Please use the correct format.");
             const [quantity, unit, description] = ingArr;
             return {
@@ -2707,7 +2717,7 @@ const uploadRecipe = async function(newRecipe) {
             servings: +newRecipe.servings,
             ingredients
         };
-        const data = await (0, _helpers.sendJSON)(`${(0, _config.API_URL)}?key=${(0, _config.KEY)}`, recipe);
+        const data = await (0, _helpers.AJAX)(`${(0, _config.API_URL)}?key=${(0, _config.KEY)}`, recipe);
         state.recipe = createRecipeObject(data);
         addBookmark(state.recipe);
     } catch (err) {
@@ -2732,8 +2742,7 @@ const MODAL_CLOSE_SEC = 2.5; // the config file is used for all the constants th
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hGI1E":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "getJSON", ()=>getJSON);
-parcelHelpers.export(exports, "sendJSON", ()=>sendJSON);
+parcelHelpers.export(exports, "AJAX", ()=>AJAX);
 var _regeneratorRuntime = require("regenerator-runtime");
 var _configJs = require("./config.js");
 const timeout = function(s) {
@@ -2743,10 +2752,17 @@ const timeout = function(s) {
         }, s * 1000);
     });
 };
-const getJSON = async function(url) {
+const AJAX = async function(url, uploadData) {
     try {
+        const fetchPro = uploadData ? fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(uploadData)
+        }) : fetch(url);
         const res = await Promise.race([
-            fetch(url),
+            fetchPro,
             timeout((0, _configJs.TIMEOUT_SEC))
         ]);
         const data = await res.json();
@@ -2755,26 +2771,42 @@ const getJSON = async function(url) {
     } catch (err) {
         throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
     }
+}; /*
+export const getJSON = async function (url) {
+  try {
+    const res = await Promise.race([fetch(url), timeout(TIMEOUT_SEC)]);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(`${data.message}( ${res.status})`);
+    return data;
+  } catch (err) {
+    throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
+  }
 };
-const sendJSON = async function(url, uploadData) {
-    try {
-        const res = await Promise.race([
-            fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(uploadData)
-            }),
-            timeout((0, _configJs.TIMEOUT_SEC))
-        ]);
-        const data = await res.json();
-        if (!res.ok) throw new Error(`${data.message}( ${res.status})`);
-        return data;
-    } catch (err) {
-        throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
-    }
-}; //the helpers.js file is a file that contains helper functions that are used in multiple files. This is a good practice to keep the code DRY.
+
+
+
+export const sendJSON = async function (url, uploadData) {
+  try {
+    const res = await Promise.race([
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(uploadData),
+      }),
+      timeout(TIMEOUT_SEC),
+    ]);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(`${data.message}( ${res.status})`);
+    return data;
+  } catch (err) {
+    throw err; // this will be caught by the catch block in the loadRecipe function in the model.js file.
+  }
+};
+*/  //the helpers.js file is a file that contains helper functions that are used in multiple files. This is a good practice to keep the code DRY.
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime":"dXNgZ","./config.js":"k5Hzs"}],"d5jf4":[function(require,module,exports,__globalThis) {
 // shim for using process in browser
@@ -2992,7 +3024,10 @@ class RecipeView extends (0, _viewJsDefault.default) {
             </div>
           </div>
 
-          <div class="recipe__user-generated">
+         <div class="recipe__user-generated ${this._data.key ? "" : "hidden"}">
+            <svg>
+              <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+            </svg>
           </div>
           <button class="btn--round btn--bookmark">
             <svg class="">
@@ -3342,7 +3377,15 @@ var _iconsSvg = require("url:../../img/icons.svg"); // url:... for parcel v2.
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
-    render(data, render = true) {
+    /**
+   *
+   * @param {Object | Object[]} data The data to be rendered (e.g. recipe)
+   * @param {boolean} [render=true] If false, create markup string instead of rendering to the DOM
+   * @returns{undefined | string} A markup string is returned if render = false
+   * @this {Object} View instance
+   * @author Jonas Schmedtmann
+   * @todo Finish implementation
+   */ render(data, render = true) {
         if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
         // this basically says if there is no data or if the data is an array and the length of the array is 0, then render the error.
         this._data = data;
@@ -3464,16 +3507,22 @@ class PreviewView extends (0, _viewJsDefault.default) {
         const id = window.location.hash.slice(1);
         return `
         <li class="preview">
-            <a class="preview__link ${this._data.id === id ? "preview__link--active" : ""}" href="#${this._data.id}">
+          <a class="preview__link ${this._data.id === id ? "preview__link--active" : ""}" href="#${this._data.id}">
               <figure class="preview__fig">
                 <img src="${this._data.image}" alt="${this._data.title}" />
               </figure>
-              <div class="preview__data">
+            <div class="preview__data">
                 <h4 class="preview__title">${this._data.title}</h4>
                 <p class="preview__publisher">${this._data.publisher}</p>
+              
+              <div class="preview__user-generated ${this._data.key ? "" : "hidden"}">
+                <svg>
+                  <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+                </svg>
               </div>
-            </a>
-          </li>
+            </div>
+          </a>
+        </li>
     `;
     }
 }
@@ -3598,7 +3647,7 @@ class AddRecipeView extends (0, _viewJsDefault.default) {
                 ...new FormData(this)
             ];
             const data = Object.fromEntries(dataArray);
-            handler(data);
+            handler(data); // what this handler does is to upload the recipe to the server and then render the recipe.
         });
     }
     _generateMarkup() {}
