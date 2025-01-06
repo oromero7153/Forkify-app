@@ -1,6 +1,6 @@
 import View from "./View.js"; // importing the parent class.
 
-import icons from "url:../../img/icons.svg"; // url:... for parcel v2.
+import icons from "../../img/icons.svg"; // url:... for parcel v2.
 import fracty from "fracty"; // importing the fracty library.
 
 class RecipeView extends View {

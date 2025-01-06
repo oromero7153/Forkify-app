@@ -1,4 +1,4 @@
-import icons from "url:../../img/icons.svg"; // url:... for parcel v2.
+import icons from "../../img/icons.svg"; // url:... for parcel v2.
 
 export default class View {
   _data;
